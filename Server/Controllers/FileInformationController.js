@@ -54,6 +54,26 @@ const userCreationController = {
       res.status(500).json({ error: 'Internal server error' });
     }
   },
+
+
+  getFileCreationByDocNo: async (req, res) => {
+    const { Doc_No } = req.params;
+
+    try {
+        const getdataByDocNo = await UserCreation.findOne({
+            where: { Doc_No },
+        });
+
+        if (!getdataByDocNo) {
+            return res.status(404).json({ error: 'File information not found' });
+        }
+
+        return res.json({ getdataByDocNo });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+},
   
   // Create a New User 
   createFileInformation: async (req, res) => {
@@ -122,7 +142,7 @@ updateFileInformation: async (req, res) => {
     const { Doc_No } = req.params;
     const {
       File_Name,
-      File_Description,
+      File_Discription,
       Cupboard_Code,
     } = req.body;
 
@@ -136,25 +156,14 @@ updateFileInformation: async (req, res) => {
       return res.status(404).json({ error: 'File information not found' });
     }
 
-    // Check the max File_No for the given Cupboard_Code
-    const maxFileNo = await UserCreation.max('File_No', {
-      where: { Cupboard_Code },
-      transaction,
-    });
-
-    // Calculate the new File_No
-    const newFileNo = maxFileNo ? maxFileNo + 1 : 1;
-    console.log("new file no",newFileNo)
-
     // Update the file information record within the transaction
     await existingFileInformation.update(
       {
       
         File_Name,
-        File_Description,
+        File_Discription,
         Cupboard_Code,
-        File_No: newFileNo,
-       
+      
       },
       { transaction }
     );

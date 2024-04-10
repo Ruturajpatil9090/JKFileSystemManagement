@@ -2,17 +2,13 @@ import React, { useState, useEffect, useRef } from "react";
 import "../../App.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
-import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-const lastemployeeCode = ""
 const EmployeeMasterComponent = () => {
   // console.log("from time values", From_Time, To_Time);
   const apiURL = process.env.REACT_APP_API_URL;
 
-  const addNewButtonRef = useRef(null);
   const resaleMillDropdownRef = useRef(null);
-
   const [updateButtonClicked, setUpdateButtonClicked] = useState(false);
   const [saveButtonClicked, setSaveButtonClicked] = useState(false);
   const [addOneButtonEnabled, setAddOneButtonEnabled] = useState(false);
@@ -25,6 +21,11 @@ const EmployeeMasterComponent = () => {
   const [highlightedButton, setHighlightedButton] = useState(null);
   const [cancelButtonClicked, setCancelButtonClicked] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+
+  const editButtonRef = useRef(null);
+  const updateButtonRef = useRef(null);
+  const setfocusFilenameref = useRef(null);
+  const addNewButtonRef = useRef(null);
 
   const [employeeDetails, setEmployeeDetails] = useState({
     Cupboard_Code: "",
@@ -77,11 +78,18 @@ const EmployeeMasterComponent = () => {
     setEditButtonEnabled(false);
     setDeleteButtonEnabled(false);
     setBackButtonEnabled(true);
-    if (resaleMillDropdownRef.current) {
-      resaleMillDropdownRef.current.focus();
+  
+  };
+
+  useEffect(() => {
+    if (isEditMode) {
+        setfocusFilenameref.current.focus();
+    }
+    else {
+        addNewButtonRef.current.focus();
     }
    
-  };
+}, [isEditMode]);
 
   const handleSaveOrUpdate = () => {
     if (isEditMode) {
@@ -90,16 +98,13 @@ const EmployeeMasterComponent = () => {
         ...employeeDetails,
      
       };
-
-      // Send the employee details to the backend API for update
       axios
         .put(
           `${apiURL}/api/employees/updatecupboardmaster/${employeeDetails.Cupboard_Code}`,
           employeeToUpdate
         )
         .then((response) => {
-          // console.log("Employee updated:", response.data);
-          // Optionally, reset the form or perform other actions after a successful update
+          window.alert("Data updated successfully!");
           setIsEditMode(false);
           setAddOneButtonEnabled(true);
           setEditButtonEnabled(true);
@@ -115,7 +120,6 @@ const EmployeeMasterComponent = () => {
           // Handle the error or show an error message
         });
     } else {
-      // Create a new object with the date part
       const employeeToSave = {
         ...employeeDetails,
       };
@@ -126,12 +130,13 @@ const EmployeeMasterComponent = () => {
         .then((response) => {
           // console.log("Employee saved:", response.data);
           window.alert("Data saved successfully!");
-          handleAddOne();
+          window.location.reload();
           setEmployeeDetails({
             Cupboard_Code: "",
             Employee_Name: "",
             
           });
+          handleAddOne();
         })
         .catch((error) => {
           console.error("Error saving employee:", error);
@@ -193,6 +198,7 @@ const EmployeeMasterComponent = () => {
           Cupboard_Name: lastRecord.Cupboard_Name,
          
         });
+        editButtonRef.current.focus();
        
       })
       .catch((error) => {
@@ -404,6 +410,7 @@ const EmployeeMasterComponent = () => {
           {isEditMode ? (
             <button
               onClick={handleSaveOrUpdate}
+              tabIndex="2"
               onKeyDown={(event) => handleKeyDown(event, handleSaveOrUpdate)}
               style={{
                 backgroundColor: "blue",
@@ -437,6 +444,7 @@ const EmployeeMasterComponent = () => {
             </button>
           )}
           <button
+            ref={editButtonRef}
             onClick={handleEdit}
             disabled={!editButtonEnabled}
             onKeyDown={(event) => handleKeyDown(event, handleEdit)}
@@ -611,6 +619,7 @@ const EmployeeMasterComponent = () => {
               <label className="form-label col-md-2"  style={{ fontWeight: 'bold' }}>Cupboard Name :</label>
               <div className="col-md-4">
                 <input
+                ref={setfocusFilenameref}
                   type="text"
                   className="form-control"
                   name="Cupboard_Name"

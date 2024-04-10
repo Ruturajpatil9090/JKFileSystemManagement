@@ -42,6 +42,7 @@ router.get('/getlastfilebyid', FileCreation.getLastFileCreation);
 router.post('/insertfile', FileCreation.createFileInformation);
 router.put('/updatefile/:Doc_No', FileCreation.updateFileInformation);
 router.delete('/deletefile/:Doc_No', FileCreation.deleteFile);
+router.get('/getdatabyDocNo/:Doc_No', FileCreation.getFileCreationByDocNo);
 
 router.get('/getfirstnavigationfile', FileCreation.getFirstNavigation);
 router.get('/getlastnavigationfile', FileCreation.getLastNavigation);

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
-
+import "../../App.css"
 var employeeCodeNew = "";
 
 const UserCreationCompoenent = () => {
@@ -23,6 +23,10 @@ const UserCreationCompoenent = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [lastEmployeeCode, setLastEmployeeCode] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  const editButtonRef = useRef(null);
+  const updateButtonRef = useRef(null);
+  const UserFullnameRef = useRef(null)
 
   const [employeeDetails, setEmployeeDetails] = useState({
     User_Code: "",
@@ -89,6 +93,7 @@ const UserCreationCompoenent = () => {
   };
 
   const handleEdit = () => {
+    // Set editing mode to true
     setIsEditing(true);
     setIsEditMode(true);
     setAddOneButtonEnabled(false);
@@ -97,11 +102,19 @@ const UserCreationCompoenent = () => {
     setEditButtonEnabled(false);
     setDeleteButtonEnabled(false);
     setBackButtonEnabled(true);
-    if (resaleMillDropdownRef.current) {
-      resaleMillDropdownRef.current.focus();
-    }
-    employeeCodeNew = employeeDetails.User_Code;
+    employeeCodeNew = employeeDetails.User_Code
+   
   };
+
+  useEffect(() => {
+    if (isEditMode) {
+      UserFullnameRef.current.focus();
+    }
+    else{
+      addNewButtonRef.current.focus();
+    }
+}, [isEditMode]);
+  
 
   const handleSaveOrUpdate = () => {
     if (isEditMode) {
@@ -185,6 +198,7 @@ const UserCreationCompoenent = () => {
     setCancelButtonEnabled(false);
     setCancelButtonClicked(true);
     setIsEditing(false);
+   
     // Use Axios to make a GET request to fetch the last record
     axios
       .get(`${apiURL}/api/employees/getlastrecordbyuserid`)
@@ -200,6 +214,7 @@ const UserCreationCompoenent = () => {
           Password: lastRecord.Password,
           User_Type: lastRecord.User_Type,
         });
+        editButtonRef.current.focus();
       })
       .catch((error) => {
         console.error("Error fetching last record:", error);
@@ -347,6 +362,7 @@ const UserCreationCompoenent = () => {
           {isEditMode ? (
             <button
               onClick={handleSaveOrUpdate}
+              tabIndex="6"
               onKeyDown={(event) => handleKeyDown(event, handleSaveOrUpdate)}
               style={{
                 backgroundColor: "blue",
@@ -380,6 +396,7 @@ const UserCreationCompoenent = () => {
             </button>
           )}
           <button
+             ref={editButtonRef}
             onClick={handleEdit}
             disabled={!editButtonEnabled}
             onKeyDown={(event) => handleKeyDown(event, handleEdit)}
@@ -429,6 +446,7 @@ const UserCreationCompoenent = () => {
             Cancel
           </button>
           <button
+        
             onClick={handleBack}
             disabled={!backButtonEnabled}
             onKeyDown={(event) => handleKeyDown(event, handleBack)}
@@ -553,16 +571,16 @@ const UserCreationCompoenent = () => {
               <div className="col-md-4">
                 <input
                   type="text"
-                  className="form-control"
+                  className={`form-control ${isEditing ? "input-focused" : ""}`} 
                   name="User_Name"
                   value={employeeDetails.User_Name}
                   onChange={handleInputChange}
                   autoComplete="off"
                   disabled={!isEditing}
                   tabIndex="1"
+                  ref={UserFullnameRef}
                   autoFocus
-
-
+                 
                 />
               </div>
             </div>

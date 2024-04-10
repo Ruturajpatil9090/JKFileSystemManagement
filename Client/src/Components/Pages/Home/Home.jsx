@@ -10,6 +10,7 @@ import dblogo from "../../../Assets/db3.png";
 import cupboard from "../../../Assets/cupboard.png"
 
 const Home = () => {
+  const apiURL = process.env.REACT_APP_API_URL;
   const [User_Type, setUserType] = useState("");
   const token = localStorage.getItem("token");
   const userName = localStorage.getItem("userName");
@@ -51,7 +52,7 @@ const Home = () => {
 
   const handleBackup = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/backup", {
+      const response = await fetch(`${apiURL}/api/backup`, {
         method: "POST",
       });
 

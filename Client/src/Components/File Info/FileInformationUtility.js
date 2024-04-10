@@ -5,7 +5,6 @@ import { FaSearch } from "react-icons/fa";
 
 function UserCreationUtility() {
   const apiURL = process.env.REACT_APP_API_URL
-
   const [fetchedData, setFetchedData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [perPage, setPerPage] = useState(10);
@@ -14,15 +13,12 @@ function UserCreationUtility() {
   const [filterValue, setFilterValue] = useState("");
   const navigate = useNavigate();
 
-
   useEffect(() => {
     const fetchData = async () => {
-
       try {
         const apiUrl = `${apiURL}/api/employees/getallFiles`;
         const response = await fetch(apiUrl);
         const data = await response.json();
-        // console.log("data is",data)
         setFetchedData(data);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -36,7 +32,6 @@ function UserCreationUtility() {
     const filtered = fetchedData.filter(post => {
       const searchTermLower = searchTerm.toLowerCase();
   
-      // Check if the searchTerm is included in specific fields
       if (
  
         post.File_Name.toLowerCase().includes(searchTermLower) ||

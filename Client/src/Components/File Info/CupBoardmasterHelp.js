@@ -7,7 +7,7 @@ import "../../App.css";
 
 var lActiveInputFeild = "";
 
-const ApiDataTableModal = ({ onAcCodeClick, name,}) => {
+const ApiDataTableModal = ({ onAcCodeClick, name,newCupBoardCode,newUserName,Disabledfeilds}) => {
   const apiURL = process.env.REACT_APP_API_URL;
   const [showModal, setShowModal] = useState(false);
   const [popupContent, setPopupContent] = useState([]);
@@ -150,11 +150,14 @@ const ApiDataTableModal = ({ onAcCodeClick, name,}) => {
 
   // Handle key events
 
+  
+
 useEffect(() => {
     const handleKeyEvents = async (event) => {
-      if (event.key === "F1") {
+      if (event.key === "F1" ) {        
         // Open the popup modal when F1 key is pressed
-        fetchAndOpenPopup();
+        // fetchAndOpenPopup();
+        handleMillCodeButtonClick();
         event.preventDefault(); // Prevent default behavior of the F1 key (browser help menu)
       } else if (event.key === "ArrowUp") {
         event.preventDefault();
@@ -191,10 +194,10 @@ useEffect(() => {
             className="form-control ms-2"
             id={name}
             autoComplete="off"
-            value={Cupboard_Code}
+            value={Cupboard_Code || newCupBoardCode}
             tabIndex="1"
-
             onChange={handleAcCodeChange}
+            disabled={Disabledfeilds}
             style={{ width: "100px", height: "35px", marginLeft: "0px" }}
        
           />
@@ -203,12 +206,14 @@ useEffect(() => {
             onClick={handleMillCodeButtonClick}
             className="ms-1"
             style={{ width: "30px", height: "35px" }}
+            tabIndex="2"
+            disabled={Disabledfeilds}
          
           >
             ...
           </Button>
           <label id="acNameLabel" className=" form-labels ms-2">
-            {Cupboard_Name}
+            {Cupboard_Name || newUserName}
           </label>
         </div>
       </div>

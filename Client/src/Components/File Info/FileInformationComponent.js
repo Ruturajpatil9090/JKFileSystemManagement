@@ -2,13 +2,16 @@ import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import CupBoardMasterHelp from "./CupBoardmasterHelp"
 import axios from "axios";
+import "../../App.css"
 
 var employeeCodeNew = "";
 var maxFileNoNew = ""
+var SlectedUserIdNew = ""
+var SelectUserName = ""
 
 const UserCreationCompoenent = () => {
     const apiURL = process.env.REACT_APP_API_URL;
-    const addNewButtonRef = useRef(null);
+   
     const resaleMillDropdownRef = useRef(null);
     const [updateButtonClicked, setUpdateButtonClicked] = useState(false);
     const [saveButtonClicked, setSaveButtonClicked] = useState(false);
@@ -27,6 +30,17 @@ const UserCreationCompoenent = () => {
     const [selectedUserId, setSelectedUserId] = useState("");
     const [selectedEmployeeName, setSelectedEmployeeName] = useState("");
     const [cupboardCode, setCupboardCode] = useState("");
+    const [maxFileNo, setMaxFileNo] = useState(0);
+
+    const [Disabledfeilds, setDisabledFeilds] = useState(false);
+
+    const editButtonRef = useRef(null);
+    const updateButtonRef = useRef(null);
+    const setfocusFilenameref = useRef(null);
+    const addNewButtonRef = useRef(null);
+    const HelpfocusRef = useRef(null)
+
+
 
 
     const getCurrentDate = () => {
@@ -54,7 +68,11 @@ const UserCreationCompoenent = () => {
             ...prevState,
             Doc_Date: getCurrentDate(),
         }));
+
+       
     }, []);
+
+
 
 
     const handleInputChange = (e) => {
@@ -83,11 +101,7 @@ const UserCreationCompoenent = () => {
         setDeleteButtonEnabled(false);
         setIsEditMode(false);
         setIsEditing(true);
-
-        // Focus on the dropdown if it exists
-        if (resaleMillDropdownRef.current) {
-            resaleMillDropdownRef.current.focus();
-        }
+        setDisabledFeilds(false);
 
         // Fetch the last employee code from the API
         axios
@@ -96,7 +110,9 @@ const UserCreationCompoenent = () => {
                 // Assuming the API response contains the last employee code
                 const lastEmployeeCode = response.data.lastUserCreation;
                 maxFileNoNew = ""
-
+                SlectedUserIdNew = ""
+                SelectUserName = ""
+             
                 // Set the last employee code to the employeeDetails
                 setEmployeeDetails({
                     Doc_No: lastEmployeeCode + 1,
@@ -105,8 +121,15 @@ const UserCreationCompoenent = () => {
                     File_Discription: "",
                     Cupboard_Code: "",
                     File_No: "",
+                  
                 });
+               
+                // window.location.reload();
+                selectedUserId = ""
+                cupboardCode = ""
                 setCurrentIndex(response.data.length - 1);
+               
+ 
             })
             .catch((error) => {
                 console.error("Error fetching last employee code:", error);
@@ -122,20 +145,27 @@ const UserCreationCompoenent = () => {
         setEditButtonEnabled(false);
         setDeleteButtonEnabled(false);
         setBackButtonEnabled(true);
-        if (resaleMillDropdownRef.current) {
-            resaleMillDropdownRef.current.focus();
-        }
+       
+  
         employeeCodeNew = employeeDetails.Doc_No;
+        //updateButtonRef.current.focus();
     };
 
+    useEffect(() => {
+        if (isEditMode) {
+            setfocusFilenameref.current.focus();
+        }
+        else {
+            addNewButtonRef.current.focus();
+        }
+       
+    }, [isEditMode]);
 
-
-    const [maxFileNo, setMaxFileNo] = useState(0);
 
     // Fetch the maximum File_No for the selected Cupboard_Code
     const fetchMaxFileNo = () => {
         axios
-            .get(`http://localhost:5000/api/employees/getLastCupboardCode/${selectedUserId}`)
+            .get(`${apiURL}/api/employees/getLastCupboardCode/${selectedUserId}`)
             .then((response) => {
 
                 const maxFileNo = response.data.maxFileNo;
@@ -174,7 +204,9 @@ const UserCreationCompoenent = () => {
                     setCancelButtonEnabled(false);
                     setUpdateButtonClicked(true);
                     setIsEditing(false);
+                    addNewButtonRef.current.focus();
                 })
+                
                 .catch((error) => {
                     console.error("Error updating data:", error);
                 });
@@ -207,7 +239,6 @@ const UserCreationCompoenent = () => {
                 });
         }
     };
-
 
     const handleBack = () => {
         navigate("/File_Info_Utility");
@@ -244,6 +275,8 @@ const UserCreationCompoenent = () => {
         setCancelButtonEnabled(false);
         setCancelButtonClicked(true);
         setIsEditing(false);
+        setDisabledFeilds(true);
+  
         // Use Axios to make a GET request to fetch the last record
         axios
             .get(`${apiURL}/api/employees/getlastfilebyid`)
@@ -252,6 +285,8 @@ const UserCreationCompoenent = () => {
                 const lastRecord = response.data.lastUserCreation;
                 employeeCodeNew = response.data.lastUserCreation.employeeCode;
                 maxFileNoNew = lastRecord.File_No;
+                SlectedUserIdNew = lastRecord.Cupboard_Code
+                SelectUserName = lastRecord.CupBoardCode_Name
                 setCupboardCode(lastRecord.Cupboard_Code);
                 setEmployeeDetails({
                     Doc_No: lastRecord.Doc_No,
@@ -261,7 +296,7 @@ const UserCreationCompoenent = () => {
                     Cupboard_Code: lastRecord.Cupboard_Code,
 
                 });
-
+                editButtonRef.current.focus();
             })
             .catch((error) => {
                 console.error("Error fetching last record:", error);
@@ -288,12 +323,12 @@ const UserCreationCompoenent = () => {
 
     const location = useLocation();
     const editRecordData = location.state && location.state.editRecordData;
+ 
 
     useEffect(() => {
         if (editRecordData) {
-            setEmployeeDetails({
-                ...editRecordData,
-            });
+            handlerecordDoubleCliked();
+        
             setAddOneButtonEnabled(true);
             setEditButtonEnabled(true);
             setDeleteButtonEnabled(true);
@@ -301,10 +336,52 @@ const UserCreationCompoenent = () => {
             setSaveButtonEnabled(false);
             setCancelButtonEnabled(false);
             setCancelButtonClicked(true);
+            setDisabledFeilds(true);
         } else {
             handleAddOne();
         }
     }, [editRecordData]);
+
+
+    const handlerecordDoubleCliked = () => {
+        setIsEditMode(false);
+        setAddOneButtonEnabled(true);
+        setEditButtonEnabled(true);
+        setDeleteButtonEnabled(true);
+        setBackButtonEnabled(true);
+        setSaveButtonEnabled(false);
+        setCancelButtonEnabled(false);
+        setCancelButtonClicked(true);
+        setIsEditing(false);
+        setDisabledFeilds(true);
+        // Use Axios to make a GET request to fetch the last record
+    axios
+    .get(`${apiURL}/api/employees/getdatabyDocNo/${editRecordData.Doc_No}`)
+    .then((response) => {
+        // Assuming the response contains the record data
+        const recordData = response.data.getdataByDocNo;
+        
+        setCupboardCode(recordData.Cupboard_Code); 
+        SlectedUserIdNew = recordData.Cupboard_Code;
+        SelectUserName = recordData.CupBoardCode_Name;
+        maxFileNoNew = recordData.File_No;
+       
+        setEmployeeDetails({
+            Doc_No: recordData.Doc_No,
+            Doc_Date: recordData.Doc_Date,
+            File_Name: recordData.File_Name,
+            File_Discription: recordData.File_Discription,
+            Cupboard_Code: recordData.Cupboard_Code,
+            File_No : recordData.File_No
+           
+        });
+    })
+    .catch((error) => {
+        console.error("Error fetching record:", error);
+    });
+};
+
+
 
     const [currentRecordIndex, setCurrentRecordIndex] = useState(0);
     const [records, setRecords] = useState([]);
@@ -313,6 +390,8 @@ const UserCreationCompoenent = () => {
         axios.get(`${apiURL}/api/employees/getfirstnavigationfile`).then((response) => {
             const firstRecord = response.data.firstUserCreation;
             maxFileNoNew = response.data.firstUserCreation.File_No
+            SlectedUserIdNew =  response.data.firstUserCreation.Cupboard_Code;
+            SelectUserName = response.data.firstUserCreation.CupBoardCode_Name;
             setEmployeeDetails(firstRecord);
             setRecords([firstRecord]);
             setCurrentRecordIndex(0);
@@ -322,7 +401,9 @@ const UserCreationCompoenent = () => {
     const fetchLastRecord = () => {
         axios.get(`${apiURL}/api/employees/getlastnavigationfile`).then((response) => {
             const lastRecord = response.data.lastUserCreation;
-            maxFileNoNew = response.data.lastUserCreation.File_No
+            maxFileNoNew = response.data.lastUserCreation.File_No;
+            SlectedUserIdNew =  response.data.lastUserCreation.Cupboard_Code;
+            SelectUserName = response.data.lastUserCreation.CupBoardCode_Name;
             setEmployeeDetails(lastRecord);
             setRecords([lastRecord]);
             setCurrentRecordIndex(0);
@@ -338,6 +419,8 @@ const UserCreationCompoenent = () => {
         if (response.data.previousUserCreation) {
             const previousRecord = response.data.previousUserCreation;
             maxFileNoNew = response.data.previousUserCreation.File_No;
+            SlectedUserIdNew =  response.data.previousUserCreation.Cupboard_Code;
+            SelectUserName = response.data.previousUserCreation.CupBoardCode_Name;
             setEmployeeDetails(previousRecord);
             setCurrentRecordIndex(currentRecordIndex - 1);
         } else {
@@ -353,7 +436,9 @@ const UserCreationCompoenent = () => {
 
         if (response.data.nextUserCreation) {
             const nextRecord = response.data.nextUserCreation;
-            maxFileNoNew = response.data.nextUserCreation.File_No
+            maxFileNoNew = response.data.nextUserCreation.File_No;
+            SlectedUserIdNew =  response.data.nextUserCreation.Cupboard_Code;
+            SelectUserName = response.data.nextUserCreation.CupBoardCode_Name;
             setEmployeeDetails(nextRecord);
             setCurrentRecordIndex(currentRecordIndex + 1);
         } else {
@@ -377,8 +462,6 @@ const UserCreationCompoenent = () => {
         fetchNextRecord();
     };
 
-
-
     const handleEmployeeCode = (code, name) => {
 
         setSelectedUserId(code);
@@ -386,8 +469,7 @@ const UserCreationCompoenent = () => {
 
     };
 
-    console.log("selectedUserId", selectedUserId)
-    console.log("selectedEmployeeName", selectedEmployeeName)
+
 
     return (
         <>
@@ -424,6 +506,8 @@ const UserCreationCompoenent = () => {
                     </button>
                     {isEditMode ? (
                         <button
+                            ref={updateButtonRef}
+                            tabindex="4" 
                             onClick={handleSaveOrUpdate}
                             onKeyDown={(event) => handleKeyDown(event, handleSaveOrUpdate)}
                             style={{
@@ -457,8 +541,9 @@ const UserCreationCompoenent = () => {
                             Save
                         </button>
                     )}
-                    {/* <button
+                    <button
                         onClick={handleEdit}
+                        ref={editButtonRef}
                         disabled={!editButtonEnabled}
                         onKeyDown={(event) => handleKeyDown(event, handleEdit)}
                         style={{
@@ -472,7 +557,7 @@ const UserCreationCompoenent = () => {
                         }}
                     >
                         Edit
-                    </button> */}
+                    </button>
                     <button
                         onClick={handleDelete}
                         disabled={!deleteButtonEnabled}
@@ -642,13 +727,15 @@ const UserCreationCompoenent = () => {
                             </div>
                         </div>
 
-                        <CupBoardMasterHelp   onAcCodeClick={handleEmployeeCode} disabled={cancelButtonClicked} initialValue={cupboardCode} />
+                        <CupBoardMasterHelp ref={HelpfocusRef}   onAcCodeClick={handleEmployeeCode} newCupBoardCode={cancelButtonClicked ? SlectedUserIdNew :"" }
+                        newUserName= {cancelButtonClicked ? SelectUserName : ""} Disabledfeilds = {Disabledfeilds} />
                         <br></br>
 
                         <div className="row mb-3">
                             <label className="form-label col-md-2" style={{ fontWeight: 'bold' }}>File name:</label>
                             <div className="col-md-4">
                                 <input
+                                ref={setfocusFilenameref}
                                     type="text"
                                     className="form-control"
                                     name="File_Name"

@@ -14,7 +14,6 @@ function UserCreationUtility() {
   const [filterValue, setFilterValue] = useState("");
   const navigate = useNavigate();
 
-  
   useEffect(() => {
     const fetchData = async () => {
    

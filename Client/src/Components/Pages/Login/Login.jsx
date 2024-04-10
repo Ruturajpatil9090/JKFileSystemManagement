@@ -6,6 +6,7 @@ import { RiLockPasswordFill } from "react-icons/ri";
 import "../../../App.css";
 
 const Login = () => {
+  const apiURL = process.env.REACT_APP_API_URL;
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -31,7 +32,7 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/employees/loginuser', {
+      const response = await fetch(`${apiURL}/api/employees/loginuser`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -125,7 +126,7 @@ const Login = () => {
             
             <br />
             <div style={{ textAlign: 'center' }}>
-              <button className="btn btn-primary rounded-pill" onClick={handleLogin}>
+              <button className="btn btn-success rounded-pill"  onClick={handleLogin}>
                 Login
               </button>
             </div>
